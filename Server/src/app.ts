@@ -23,7 +23,7 @@ if (
   throw new Error("Missing environment variables");
 }
 app.use(cors({
-  origin: "http://localhost:5173", // Vite default port
+  origin: "https://servicehive-0ffg.onrender.com", // Vite default port
   credentials: true
 }));
 app.use(cookieParser());
