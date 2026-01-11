@@ -37,9 +37,13 @@ export const initializeSocket = (server: HttpServer) => {
     }
 
     const { authToken } = cookie.parse(cookies);
-
+    if (!authToken) {
+      socket.disconnect();
+      return;
+    }
+    console.log("authToken::", authToken);
     try {
-      const payload = jwt.verify(authToken, process.env.JWT_SECRET as string) as JWTPayload;
+      const payload = jwt.verify(authToken!, process.env.JWT_SECRET as string) as unknown as JWTPayload;
       const user = await findUserById(payload._id);
       if (!user) {
         socket.disconnect();
