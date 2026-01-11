@@ -42,8 +42,8 @@ const GigDetail: React.FC = () => {
   const fetchGigDetails = async () => {
     try {
       setLoading(true);
-      // Fetch gig details
-      const gigResponse = await api.get(`/gigs?title=`);
+      // Fetch all gigs and find the specific one
+      const gigResponse = await api.get('/gigs');
       const foundGig = gigResponse.data.data.find((g: Gig) => g.id === id);
       
       if (!foundGig) {
