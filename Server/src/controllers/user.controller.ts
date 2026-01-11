@@ -21,7 +21,8 @@ export const register = async (req: Request, res: Response) => {
     if (!user) {
       throw new ApiError(500, "User registration failed");
     }
-
+    const token = user.generateToken();
+    res.cookie("authToken", token, { httpOnly: true });
     return res
       .status(201)
       .json(new ApiResponse(201, user, "Registration successful"));
