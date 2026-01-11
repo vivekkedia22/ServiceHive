@@ -5,7 +5,7 @@ import { findUserById } from "./services/user.service";
 import type { JWTPayload } from "./types";
 import { eventListener } from "./eventListener";
 import type { GigDocument } from "./models/gig.model";
-import { Bid, Bid, type BidDocument } from "./models/bid.model";
+import {  Bid, type BidDocument } from "./models/bid.model";
 /**
  * Connects the socket.io to the server
  * @param server
