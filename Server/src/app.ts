@@ -23,9 +23,11 @@ if (
   throw new Error("Missing environment variables");
 }
 app.use(cors({
-  origin: ["http://localhost:5173","https://servicehive-0ffg.onrender.com"],
+  origin: ["http://localhost:5173", "https://servicehive-0ffg.onrender.com"],
   credentials: true
 }));
+app.set("trust proxy", 1);
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(logger);
