@@ -8,7 +8,7 @@ import gigRoutes from "./routes/gig.routes";
 import hiringRoutes from "./routes/hiring.routes";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-
+import type { Response } from "express"
 const app = express();
 
 dotenv.config({ path: ".env.server" });
@@ -29,6 +29,9 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 app.use(logger);
+
+
+app.get("/health", (_, res: Response) => res.status(200).send("OK"));
 
 app.use("/api", userRoutes);
 app.use("/api", gigRoutes);
