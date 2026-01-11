@@ -22,7 +22,7 @@ export const register = async (req: Request, res: Response) => {
       throw new ApiError(500, "User registration failed");
     }
     const token = user.generateToken();
-    res.cookie("authToken", token, { httpOnly: true });
+    res.cookie("authToken", token, { httpOnly: true,sameSite:"none",secure:true,path:"/" });
     return res
       .status(201)
       .json(new ApiResponse(201, user, "Registration successful"));
@@ -43,7 +43,7 @@ export const login = async (req: Request, res: Response) => {
       throw new ApiError(400, "Invalid password");
     }
     const token = foundUser.generateToken();
-    res.cookie("authToken", token, { httpOnly: true });
+        res.cookie("authToken", token, { httpOnly: true,sameSite:"none",secure:true,path:"/" });
     return res
       .status(200)
       .json(new ApiResponse(200, foundUser, "Login successful"));
