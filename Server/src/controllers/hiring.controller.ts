@@ -33,7 +33,11 @@ export const hireBid = async (req: Request, res: Response) => {
         if (!hiredBid) {
             throw new ApiError(500, "Failed to hire bid");
         }
-        eventListener.emit("hire", { gig });
+        console.log("emititng nothng here");
+        eventListener.emit("hire", {
+            gig,
+            freelancerId: bid.freelancerId.toHexString()
+        });
         return res.status(200).json(new ApiResponse(200, hiredBid, "Bid hired"));
     } catch (error: any) {
 

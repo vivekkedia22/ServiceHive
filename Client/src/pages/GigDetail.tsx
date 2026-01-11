@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import BidList from '../components/BidList';
 
 interface Gig {
@@ -25,6 +26,7 @@ interface Bid {
 const GigDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [gig, setGig] = useState<Gig | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ const GigDetail: React.FC = () => {
       const foundGig = gigResponse.data.data.find((g: Gig) => g.id === id);
       
       if (!foundGig) {
-        setError('Gig not found');
+        setError('Gig not found or already assigned');
         return;
       }
       
@@ -85,7 +87,7 @@ const GigDetail: React.FC = () => {
         message: bidMessage,
       });
       setBidMessage('');
-      alert('Bid submitted successfully!');
+      showToast('Bid submitted successfully!', 'success');
     } catch (err: any) {
       setBidError(err.response?.data?.message || 'Failed to submit bid');
     } finally {
@@ -110,9 +112,9 @@ const GigDetail: React.FC = () => {
         setGig({ ...gig, status: 'assigned' });
       }
       
-      alert('Freelancer hired successfully!');
+      showToast('Freelancer hired successfully!', 'success');
     } catch (err: any) {
-      alert('Failed to hire freelancer: ' + (err.response?.data?.message || 'Unknown error'));
+      showToast('Failed to hire freelancer: ' + (err.response?.data?.message || 'Unknown error'), 'error');
       // Refresh data on error
       fetchGigDetails();
     }

@@ -25,3 +25,10 @@ export const findBidByGigIdAndFreelancerId = async (gigId: string, freelancerId:
   });
   return bid;
 }
+
+export const findBidByFreelancerId = async (freelancerId: string): Promise<BidDocument[] | null> => {
+  const bids = await Bid.find({
+    freelancerId
+  }).populate('gigId');
+  return bids;
+}

@@ -12,8 +12,8 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login on 401
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/me')) {
+      // Only redirect to login on 401 for non-auth-check requests
       window.location.href = '/login';
     }
     return Promise.reject(error);

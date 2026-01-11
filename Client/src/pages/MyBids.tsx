@@ -3,23 +3,25 @@ import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
-interface Bid {
-  id: string;
-  message: string;
-  status: string;
-  gigId: string;
-  freelancerId: string;
-  createdAt: string;
-}
-
 interface Gig {
   id: string;
   title: string;
   budget: number;
+  description: string;
+  status: string;
+}
+
+interface Bid {
+  id: string;
+  message: string;
+  status: string;
+  gigId: Gig; // Now populated with full gig object
+  freelancerId: string;
+  createdAt: string;
 }
 
 const MyBids: React.FC = () => {
-  const [bids, setBids] = useState<(Bid & { gig?: Gig })[]>([]);
+  const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
@@ -31,41 +33,8 @@ const MyBids: React.FC = () => {
   const fetchMyBids = async () => {
     try {
       setLoading(true);
-      // Since there's no direct endpoint for user's bids, we need to fetch all gigs
-      // and then fetch bids for each gig to find user's bids
-      const gigsResponse = await api.get('/gigs');
-      const allGigs = gigsResponse.data.data;
-      
-      const userBids: (Bid & { gig?: Gig })[] = [];
-      
-      // This is not ideal but necessary given the current API structure
-      // In a real app, there should be a /api/bids/my endpoint
-      for (const gig of allGigs) {
-        try {
-          const bidsResponse = await api.get(`/bids/${gig.id}`);
-          const gigBids = bidsResponse.data.data || [];
-          
-          // Find bids by current user
-          const myBidsForGig = gigBids.filter((bid: Bid) => bid.freelancerId === user?.id);
-          
-          // Add gig info to each bid
-          myBidsForGig.forEach((bid: Bid) => {
-            userBids.push({
-              ...bid,
-              gig: {
-                id: gig.id,
-                title: gig.title,
-                budget: gig.budget,
-              }
-            });
-          });
-        } catch (bidErr) {
-          // Skip gigs where we can't fetch bids (not owner)
-          continue;
-        }
-      }
-      
-      setBids(userBids);
+      const response = await api.get('/bids');
+      setBids(response.data.data || []);
     } catch (err: any) {
       setError('Failed to fetch your bids');
       console.error('Error fetching bids:', err);
@@ -122,10 +91,15 @@ const MyBids: React.FC = () => {
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {bid.gig?.title || 'Unknown Gig'}
+                    {bid.gigId?.title || 'Unknown Gig'}
                   </h3>
                   <div className="text-sm text-gray-600 mb-2">
-                    Budget: ${bid.gig?.budget || 'N/A'}
+                    Budget: ${bid.gigId?.budget || 'N/A'}
+                  </div>
+                  <div className="text-sm text-gray-500 mb-2">
+                    Status: <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(bid.status)}`}>
+                      {bid.status}
+                    </span>
                   </div>
                 </div>
                 <span className={`px-3 py-1 text-sm rounded-full ${getStatusColor(bid.status)}`}>
@@ -142,9 +116,9 @@ const MyBids: React.FC = () => {
                 <div className="text-sm text-gray-500">
                   Submitted {new Date(bid.createdAt).toLocaleDateString()}
                 </div>
-                {bid.gig && (
+                {bid.gigId && (
                   <Link
-                    to={`/gig/${bid.gig.id}`}
+                    to={`/gig/${bid.gigId.id}`}
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm"
                   >
                     View Gig

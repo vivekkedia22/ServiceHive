@@ -1,39 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSocket } from '../hooks/useSocket';
-import NotificationToast from '../components/NotificationToast';
-
-interface Notification {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
-  const { socket, connected } = useSocket();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('hire', (data: any) => {
-        const notification: Notification = {
-          id: Date.now().toString(),
-          message: `Congratulations! You've been hired for "${data.gig?.title || 'a gig'}"!`,
-          type: 'success',
-        };
-        setNotifications(prev => [...prev, notification]);
-      });
-
-      return () => {
-        socket.off('hire');
-      };
-    }
-  }, [socket]);
-
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  const { user, connected } = useAuth();
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -138,14 +107,6 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Render notifications */}
-      {notifications.map((notification) => (
-        <NotificationToast
-          key={notification.id}
-          message={notification.message}
-          type={notification.type}
-          onClose={() => removeNotification(notification.id)}
-        />
-      ))}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { createBidOps, findBidByGigIdAndFreelancerId, findBidsByGigId } from "../services/bid.service";
+import { createBidOps, findBidByFreelancerId, findBidByGigIdAndFreelancerId, findBidsByGigId } from "../services/bid.service";
 import { ApiError } from "../utils/apierror";
 import { ApiResponse } from "../utils/apiresponse";
 import { GIG_STATUS } from "../constants/gigStatus";
@@ -33,7 +33,18 @@ export const createBid = async (req: Request, res: Response) => {
     throw new ApiError(500, error?.message);
   }
 };
-
+export const getMyBids = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+    const freelancerId = req.user._id;
+    const bids = await findBidByFreelancerId(freelancerId);
+    return res.status(200).json(new ApiResponse(200, bids, "Bids retrieved"));
+  } catch (error: any) {
+    throw new ApiError(500, error?.message);
+  }
+}
 export const getBidsByGigId = async (req: Request, res: Response) => {
   try {
     const { gigId } = req.params;
