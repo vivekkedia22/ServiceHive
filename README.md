@@ -151,4 +151,4 @@ Frontend runs on `http://localhost:5173`
 
 ## License
 
-This project is part of the GigFlow assignment.
+This project is part of the ServiceHive assignment.
