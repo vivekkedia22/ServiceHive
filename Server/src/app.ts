@@ -30,7 +30,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(logger);
 
-
+app.get("/", (_, res: Response) => res.status(200).send("Hello World!"))
 app.get("/health", (_, res: Response) => res.status(200).send("OK"));
 
 app.use("/api", userRoutes);
