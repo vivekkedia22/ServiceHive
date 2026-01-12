@@ -25,20 +25,24 @@ A Node.js + Express + MongoDB backend for the GigFlow freelancing platform with 
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/me` - Get current user
 
 ### Gigs
+
 - `GET /api/gigs?title=<search>` - Get gigs with optional search
 - `POST /api/gigs` - Create new gig (auth required)
 
 ### Bids
+
 - `GET /api/bids` - Get current user's bids (auth required)
 - `POST /api/bids` - Submit bid (auth required)
 - `GET /api/bids/:gigId` - Get bids for gig (owner only)
 
 ### Hiring
+
 - `PATCH /api/bids/:bidId/hire` - Hire freelancer (auth required)
 
 ## Getting Started
@@ -52,26 +56,31 @@ A Node.js + Express + MongoDB backend for the GigFlow freelancing platform with 
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Copy environment variables:
+
 ```bash
 cp .env.server.example .env.server
 ```
 
 3. Update environment variables in `.env.server`:
+
 ```env
 JWT_SECRET=your-jwt-secret-key
 MONGO_URI=mongodb://localhost:27017/gigflow
 JWT_EXPIRES_IN=7d
 PORT=8000
+CLIENT_URI=http://localhost:5173
 ```
 
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -88,11 +97,13 @@ npm start
 ## Database Models
 
 ### User
+
 - `name`: string
 - `email`: string (unique)
 - `password`: string (hashed)
 
 ### Gig
+
 - `title`: string
 - `description`: string
 - `budget`: number
@@ -100,6 +111,7 @@ npm start
 - `status`: 'open' | 'assigned'
 
 ### Bid
+
 - `gigId`: ObjectId (ref: Gig)
 - `freelancerId`: ObjectId (ref: User)
 - `message`: string
@@ -108,14 +120,22 @@ npm start
 ## Socket.io Events
 
 ### Client → Server
+
 - Connection with JWT token via cookies
 
 ### Server → Client
+
 - `hire`: Emitted when freelancer is hired
   ```json
   {
     "gig": { "title": "Gig Title", "id": "gigId" },
     "freelancerId": "userId"
+  }
+  ```
+- `unauthorized` : Emitted when there is token error
+  ```json
+  {
+    "cookie":"cookie"
   }
   ```
 
@@ -155,12 +175,13 @@ src/
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `JWT_SECRET` | Secret key for JWT signing | Required |
-| `MONGO_URI` | MongoDB connection string | Required |
-| `JWT_EXPIRES_IN` | JWT expiration time | `7d` |
-| `PORT` | Server port | `8000` |
+| Variable         | Description                         | Default                 |
+| ---------------- | ----------------------------------- | ----------------------- |
+| `JWT_SECRET`     | Secret key for JWT signing          | Required                |
+| `MONGO_URI`      | MongoDB connection string           | Required                |
+| `JWT_EXPIRES_IN` | JWT expiration time                 | `7d`                    |
+| `PORT`           | Server port                         | `8000`                  |
+| `CLIENT_URI`     | Client URI to be used in production | `http://localhost:5173` |
 
 ## Contributing
 

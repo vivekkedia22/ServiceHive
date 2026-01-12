@@ -13,52 +13,65 @@ import cookie from "cookie"
  * @returns {Server}
  */
 export const initializeSocket = (server: HttpServer) => {
-  const io = new Server(server, {
-    cors: {
-      origin: ["http://localhost:5173", "https://servicehive-0ffg.onrender.com"],
-      credentials: true,
-
-    },
-  });
-
-  // Move the hire event listener outside of connection handler
-  eventListener.on("hire", (data: { gig: GigDocument, freelancerId: string }) => {
-    console.log("Emitting hire event to freelancer:", data.freelancerId);
-    io.to(data.freelancerId).emit("hire", data);
-  });
+  console.log("Trying to create a Socket connection");
+  let io: Server;
+  try {
+    io = new Server(server, {
+      cors: {
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        credentials: true
+      },
+      cookie: {
+        name: "authToken",
+        httpOnly: true,
+        sameSite: "none",
+        secure: true
+      },
+      transports: ["websocket"],
+    })
+  } catch (error) {
+    console.log("Error:Failed to create a Socket connection", error);
+    throw new Error("Failed to create a Socket connection");
+  }
 
   io.on("connection", async (socket) => {
     console.log("User connected:", socket.id);
-
     const cookies = socket.handshake.headers.cookie;
     if (!cookies) {
-      socket.disconnect();
-      return;
+      socket.emit("unauthorized", { cookie });
+      return socket.disconnect();
     }
 
     const { authToken } = cookie.parse(cookies);
     if (!authToken) {
-      socket.disconnect();
-      return;
+      socket.emit("unauthorized", { cookie });
+      return socket.disconnect();
+
     }
     console.log("authToken::", authToken);
     try {
       const payload = jwt.verify(authToken!, process.env.JWT_SECRET as string) as unknown as JWTPayload;
       const user = await findUserById(payload._id);
       if (!user) {
-        socket.disconnect();
-        return;
+        socket.emit("unauthorized", { cookie });
+        return socket.disconnect();
       }
       socket.join(user._id.toHexString());
     } catch (error) {
-      console.log('Invalid token in socket connection');
-      socket.disconnect();
-      return;
+      socket.emit("unauthorized", { cookie });
+      return socket.disconnect();
+
+
     }
 
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
     });
   });
+  eventListener.on("hire", (data: { gig: GigDocument, freelancerId: string }) => {
+    console.log("Emitting hire event to freelancer:", data.freelancerId);
+    io.to(data.freelancerId).emit("hire", data);
+  });
+
   return io;
 };
