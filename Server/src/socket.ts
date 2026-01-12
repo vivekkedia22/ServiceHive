@@ -13,67 +13,41 @@ import cookie from "cookie"
  * @returns {Server}
  */
 export const initializeSocket = (server: HttpServer) => {
-  console.log("Trying to create a Socket connection");
-  let io: Server;
-  try {
-    io = new Server(server, {
-      cors: {
-        origin: [process.env.CLIENT_URL || "http://localhost:5173","http://localhost:5173"],
-        credentials: true
-      },
-      cookie: {
-        name: "authToken",
-        httpOnly: true,
-        sameSite: "none",
-        secure: true
-      },
-      transports: ["websocket"],
-    })
-  } catch (error) {
-    console.log("Error:Failed to create a Socket connection", error);
-    throw new Error("Failed to create a Socket connection");
-  }
+  const io = new Server(server, {
+    cors: {
+      origin: [process.env.CLIENT_URL!, "http://localhost:5173"],
+      credentials: true,
+    },
+    transports: ["websocket"],
+  });
 
   io.on("connection", async (socket) => {
-    console.log("User connected:", socket.id);
-    const cookies = socket.handshake.headers.cookie;
-    if (!cookies) {
-      console.log("No cookies found");
-      socket.emit("unauthorized", { cookie });
-      return socket.disconnect();
-    }
-
-    const { authToken } = cookie.parse(cookies);
-    if (!authToken) {
-      console.log("No cookies found");
-      socket.emit("unauthorized", { cookie });
-      return socket.disconnect();
-
-    }
-    console.log("authToken::", authToken);
     try {
-      const payload = jwt.verify(authToken!, process.env.JWT_SECRET as string) as unknown as JWTPayload;
+      const cookieHeader = socket.handshake.headers.cookie;
+      if (!cookieHeader) throw new Error("No cookies");
+
+      const { authToken } = cookie.parse(cookieHeader);
+      if (!authToken) throw new Error("No token");
+
+      const payload = jwt.verify(
+        authToken,
+        process.env.JWT_SECRET!
+      ) as JWTPayload;
+
       const user = await findUserById(payload._id);
-      if (!user) {
-        socket.emit("unauthorized", { cookie });
-        return socket.disconnect();
-      }
+      if (!user) throw new Error("User not found");
+
       socket.join(user._id.toHexString());
-    } catch (error) {
-      console.log("No cookies found");
-      socket.emit("unauthorized", { cookie });
-      return socket.disconnect();
+      console.log("Socket authenticated:", user._id.toHexString());
 
-
+    } catch (err) {
+      socket.emit("unauthorized");
+      socket.disconnect();
     }
-
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-    });
   });
-  eventListener.on("hire", (data: { gig: GigDocument, freelancerId: string }) => {
-    console.log("Emitting hire event to freelancer:", data.freelancerId);
-    io.to(data.freelancerId).emit("hire", data);
+
+  eventListener.on("hire", ({ freelancerId, gig }) => {
+    io.to(freelancerId).emit("hire", { gig, freelancerId });
   });
 
   return io;
