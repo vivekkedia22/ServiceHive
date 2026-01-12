@@ -74,7 +74,7 @@ JWT_SECRET=your-jwt-secret-key
 MONGO_URI=mongodb://localhost:27017/gigflow
 JWT_EXPIRES_IN=7d
 PORT=8000
-CLIENT_URI=http://localhost:5173
+CLIENT_URL=http://localhost:5173
 ```
 
 ### Development
@@ -181,7 +181,7 @@ src/
 | `MONGO_URI`      | MongoDB connection string           | Required                |
 | `JWT_EXPIRES_IN` | JWT expiration time                 | `7d`                    |
 | `PORT`           | Server port                         | `8000`                  |
-| `CLIENT_URI`     | Client URI to be used in production | `http://localhost:5173` |
+| `CLIENT_URL`     | Client URI to be used in production | `http://localhost:5173` |
 
 ## Contributing
 
