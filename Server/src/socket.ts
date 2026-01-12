@@ -18,7 +18,15 @@ export const initializeSocket = (server: HttpServer) => {
       origin: [process.env.CLIENT_URL!, "http://localhost:5173"],
       credentials: true,
     },
-    transports: ["websocket"],
+    path:"/socket.io",
+    // transports: ["websocket"],
+  });
+  io.engine.on("connection", (engineSocket) => {
+    console.log("ENGINE handshake headers:", {
+      origin: engineSocket.request.headers.origin,
+      cookie: engineSocket.request.headers.cookie,
+      host: engineSocket.request.headers.host,
+    });
   });
 
   io.on("connection", async (socket) => {
