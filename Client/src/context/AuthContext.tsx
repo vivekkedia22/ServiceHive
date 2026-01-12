@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { io, Socket } from 'socket.io-client';
-import api from '../api/axios';
-
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { io, Socket } from "socket.io-client";
+import api from "../api/axios";
 
 interface User {
   id: string;
@@ -25,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -47,26 +46,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Socket connection effect
   useEffect(() => {
     if (user) {
-      const socketUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
-      console.log('Connecting to:', socketUrl);
-      
+      const socketUrl =
+        import.meta.env.VITE_API_BASE_URL?.replace("/api", "") ||
+        "http://localhost:8000";
+      console.log("Connecting to:", socketUrl);
+
       const newSocket = io(socketUrl, {
-        transports: ['websocket'],
-        withCredentials: true
+        // transports: ['websocket'],
+        withCredentials: true,
+        path: "/socket.io",
       });
 
-      newSocket.on('connect', () => {
-        console.log('Socket connected');
+      newSocket.on("connect", () => {
+        console.log("Socket connected");
         setConnected(true);
       });
 
-      newSocket.on('disconnect', () => {
-        console.log('Socket disconnected');
+      newSocket.on("disconnect", () => {
+        console.log("Socket disconnected");
         setConnected(false);
       });
 
-      newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
+      newSocket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
       });
 
       setSocket(newSocket);
@@ -86,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get("/auth/me");
       setUser(response.data.data);
     } catch (error) {
       setUser(null);
@@ -96,18 +98,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post("/auth/login", { email, password });
     setUser(response.data.data);
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const response = await api.post('/auth/register', { name, email, password });
+    const response = await api.post("/auth/register", {
+      name,
+      email,
+      password,
+    });
     setUser(response.data.data);
   };
 
   const logout = () => {
     setUser(null);
-    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie =
+      "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   };
 
   const value = {
