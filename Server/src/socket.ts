@@ -18,7 +18,7 @@ export const initializeSocket = (server: HttpServer) => {
   try {
     io = new Server(server, {
       cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        origin: [process.env.CLIENT_URL || "http://localhost:5173","http://localhost:5173"],
         credentials: true
       },
       cookie: {
@@ -38,12 +38,14 @@ export const initializeSocket = (server: HttpServer) => {
     console.log("User connected:", socket.id);
     const cookies = socket.handshake.headers.cookie;
     if (!cookies) {
+      console.log("No cookies found");
       socket.emit("unauthorized", { cookie });
       return socket.disconnect();
     }
 
     const { authToken } = cookie.parse(cookies);
     if (!authToken) {
+      console.log("No cookies found");
       socket.emit("unauthorized", { cookie });
       return socket.disconnect();
 
@@ -58,6 +60,7 @@ export const initializeSocket = (server: HttpServer) => {
       }
       socket.join(user._id.toHexString());
     } catch (error) {
+      console.log("No cookies found");
       socket.emit("unauthorized", { cookie });
       return socket.disconnect();
 
