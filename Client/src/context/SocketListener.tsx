@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
-import { data } from "react-router-dom";
 
 interface SocketListenerProps {
   children: React.ReactNode;
